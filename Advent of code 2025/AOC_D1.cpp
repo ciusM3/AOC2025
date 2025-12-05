@@ -74,6 +74,7 @@ void part2()
 			}
 		}
 	}
+
 	cout << posOfDial << endl;
 
 	cout << "answer: " << countOf0;
