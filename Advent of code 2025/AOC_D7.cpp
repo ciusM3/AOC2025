@@ -41,6 +41,25 @@ char** createMap(int& noRows, int& noCols)
 	return map;
 }
 
+char** copyMap(char** map, int noRows, int noCols)
+{
+	char** mapCopy = (char**)malloc(noRows * sizeof(char*));
+	for (int i = 0; i < noRows; i++)
+		mapCopy[i] = (char*)malloc(noCols * sizeof(char));
+
+	for (int i = 0; i < noRows; i++)
+		memcpy(mapCopy[i], map[i], noCols * sizeof(char));
+
+	return mapCopy;
+}
+
+void freeMap(char** map, int noRows)
+{
+	for (int i = 0; i < noRows; i++)
+		free(map[i]);
+	free(map);
+}
+
 void printMap(char** map, int noRows, int noCols)
 {
 	for (int i = 0; i < noRows; i++)
@@ -93,7 +112,51 @@ void tachyonSplit(char** map, int currentCol, int currentRow, int noRows, int no
 
 }
 
+void tachyonSplitTimelines(char** map, int currentCol, int currentRow, int noRows, int noCols)
+{
+	if (currentRow == noRows - 1)
+	{
+		printMap(map, noRows, noCols);   
+		cout << endl;
+		return;
+	}
 
+	if (map[currentRow + 1][currentCol] == '.')  // if the beam can pass straight down I put | and continue to the next row
+	{
+		if (map[currentRow + 1][currentCol] == '.')
+			map[currentRow + 1][currentCol] = '|';
+		tachyonSplitTimelines(map, currentCol, currentRow + 1, noRows, noCols);
+		map[currentRow + 1][currentCol] = '.';
+	}
+	else
+	{
+
+		if (map[currentRow + 1][currentCol - 1] != '|')  // there is a splitter, go left 
+		{
+			char** currentMapState = copyMap(map, noRows, noCols);     // I make a copy of current state so i can revert to it on next timeline
+
+			map[currentRow + 1][currentCol - 1] = '|';
+			tachyonSplitTimelines(map, currentCol - 1, currentRow + 1, noRows, noCols);
+
+			for (int i = 0; i < noRows; i++)
+				memcpy(map[i], currentMapState[i], noCols * sizeof(char)); // revert to original state
+
+			free(currentMapState);
+		}
+			
+		if (map[currentRow + 1][currentCol + 1] != '|') // there is a splitter, go right
+		{
+			char** currentMapState = copyMap(map, noRows, noCols);     // I make a copy of current state so i can revert to it on next timeline
+
+			map[currentRow + 1][currentCol + 1] = '|';
+			tachyonSplitTimelines(map, currentCol + 1, currentRow + 1, noRows, noCols);
+			for (int i = 0; i < noRows; i++)
+				memcpy(map[i], currentMapState[i], noCols * sizeof(char)); // revert to original state
+
+			freeMap(currentMapState, noRows);
+		}
+	}
+}
 
 int noOfSplitersHit(char** map, int noRows, int noCols)
 {
@@ -123,7 +186,20 @@ void part1()
 
 }
 
+void part2()
+{
+	int noRows, noCols;
+	char** map = createMap(noRows, noCols);
+
+
+	int start = getStart(map, noCols);
+
+	tachyonSplitTimelines(map, start, 0, noRows, noCols);
+	
+
+}
+
 int main()
 {
-	part1();
+	part2();
 }
