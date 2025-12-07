@@ -1,5 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
-
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <string.h>
@@ -39,25 +39,6 @@ char** createMap(int& noRows, int& noCols)
 	noCols -= 1; // because its almost a perfect square multidimensional array but noCols are -1
 
 	return map;
-}
-
-char** copyMap(char** map, int noRows, int noCols)
-{
-	char** mapCopy = (char**)malloc(noRows * sizeof(char*));
-	for (int i = 0; i < noRows; i++)
-		mapCopy[i] = (char*)malloc(noCols * sizeof(char));
-
-	for (int i = 0; i < noRows; i++)
-		memcpy(mapCopy[i], map[i], noCols * sizeof(char));
-
-	return mapCopy;
-}
-
-void freeMap(char** map, int noRows)
-{
-	for (int i = 0; i < noRows; i++)
-		free(map[i]);
-	free(map);
 }
 
 void printMap(char** map, int noRows, int noCols)
@@ -109,9 +90,50 @@ void tachyonSplit(char** map, int currentCol, int currentRow, int noRows, int no
 				map[currentRow + 1][currentCol + 1] = '|';
 				tachyonSplit(map, currentCol + 1, currentRow + 1, noRows, noCols);
 			}
-
 }
 
+long long int tachyonSplitP2(char** map, int noRows, int noCols)
+{
+	int start = getStart(map, noCols);
+
+	long long int** lldMap = (long long int**)calloc(noRows, sizeof(long long int*));  
+	for (int i = 0; i < noRows; i++) 
+		lldMap[i] = (long long int*)calloc(noCols, sizeof(long long int));  
+
+	lldMap[0][start] = 1;
+
+	for (int i = 1; i < noRows; i++)
+	{
+		for (int j = 0; j < noCols; j++)
+		{
+			if (map[i][j] == '^')
+			{
+				if (j + 1 < noCols)
+					lldMap[i][j + 1] += lldMap[i - 1][j];
+
+				if (j - 1 >= 0)
+					lldMap[i][j - 1] += lldMap[i - 1][j];
+			}
+			else
+			{
+				lldMap[i][j] += lldMap[i - 1][j];
+			}
+		}
+	}
+
+	for (int i = 0; i < noRows; i++)
+	{
+		for (int j = 0; j < noCols; j++)
+			cout << lldMap[i][j] << " ";
+		cout << endl;
+	}
+
+	long long int answer = 0;
+	for (int i = 0; i < noCols; i++)
+		answer += lldMap[noRows - 1][i];
+
+	return answer;
+}
 
 int noOfSplitersHit(char** map, int noRows, int noCols)  // used for part 1, the answer is the number of spliters the beams hit
 {
@@ -144,7 +166,7 @@ void part2()
 	int noRows, noCols;
 	char** map = createMap(noRows, noCols);
 
-	int start = getStart(map, noCols);
+	long long int answer = tachyonSplitP2(map, noRows, noCols);;
 
 	cout << "answer: " << answer << endl;
 }
