@@ -36,7 +36,7 @@ char** createMap(int& noRows, int& noCols)
 		noRows++;
 	}
 
-	noCols -= 1; // because its almost a perfect square 2d array but noCols are -1
+	noCols -= 1; // because its almost a perfect square multidimensional array but noCols are -1
 
 	return map;
 }
@@ -112,53 +112,8 @@ void tachyonSplit(char** map, int currentCol, int currentRow, int noRows, int no
 
 }
 
-void tachyonSplitTimelines(char** map, int currentCol, int currentRow, int noRows, int noCols)
-{
-	if (currentRow == noRows - 1)
-	{
-		printMap(map, noRows, noCols);   
-		cout << endl;
-		return;
-	}
 
-	if (map[currentRow + 1][currentCol] == '.')  // if the beam can pass straight down I put | and continue to the next row
-	{
-		if (map[currentRow + 1][currentCol] == '.')
-			map[currentRow + 1][currentCol] = '|';
-		tachyonSplitTimelines(map, currentCol, currentRow + 1, noRows, noCols);
-		map[currentRow + 1][currentCol] = '.';
-	}
-	else
-	{
-
-		if (map[currentRow + 1][currentCol - 1] != '|')  // there is a splitter, go left 
-		{
-			char** currentMapState = copyMap(map, noRows, noCols);     // I make a copy of current state so i can revert to it on next timeline
-
-			map[currentRow + 1][currentCol - 1] = '|';
-			tachyonSplitTimelines(map, currentCol - 1, currentRow + 1, noRows, noCols);
-
-			for (int i = 0; i < noRows; i++)
-				memcpy(map[i], currentMapState[i], noCols * sizeof(char)); // revert to original state
-
-			free(currentMapState);
-		}
-			
-		if (map[currentRow + 1][currentCol + 1] != '|') // there is a splitter, go right
-		{
-			char** currentMapState = copyMap(map, noRows, noCols);     // I make a copy of current state so i can revert to it on next timeline
-
-			map[currentRow + 1][currentCol + 1] = '|';
-			tachyonSplitTimelines(map, currentCol + 1, currentRow + 1, noRows, noCols);
-			for (int i = 0; i < noRows; i++)
-				memcpy(map[i], currentMapState[i], noCols * sizeof(char)); // revert to original state
-
-			freeMap(currentMapState, noRows);
-		}
-	}
-}
-
-int noOfSplitersHit(char** map, int noRows, int noCols)
+int noOfSplitersHit(char** map, int noRows, int noCols)  // used for part 1, the answer is the number of spliters the beams hit
 {
 	int count = 0;
 	for (int i = 1; i < noRows; i++)
@@ -175,7 +130,6 @@ void part1()
 	int noRows, noCols;
 	char** map = createMap(noRows, noCols);
 
-
 	int start = getStart(map, noCols);
 
 	tachyonSplit(map, start, 0, noRows, noCols);
@@ -183,7 +137,6 @@ void part1()
 	printMap(map, noRows, noCols);
 
 	cout << "answer: " << answer << endl;
-
 }
 
 void part2()
@@ -191,12 +144,9 @@ void part2()
 	int noRows, noCols;
 	char** map = createMap(noRows, noCols);
 
-
 	int start = getStart(map, noCols);
 
-	tachyonSplitTimelines(map, start, 0, noRows, noCols);
-	
-
+	cout << "answer: " << answer << endl;
 }
 
 int main()
