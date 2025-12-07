@@ -117,7 +117,6 @@ void part1()
 	int noOfSliptLines = tachyonSplit(map, start, 0, noRows, noCols);
 	int answer = noOfSplitersHit(map, noRows, noCols);
 	printMap(map, noRows, noCols);
-
 	cout << "answer: " << answer << endl;
 	
 }
