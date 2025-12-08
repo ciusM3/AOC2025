@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string.h>
@@ -12,7 +13,7 @@ typedef struct edgeStruct
 {
 	int firstNode;
 	int secondNode;
-	int cost;
+	long long int cost;
 };
 
 typedef struct NS
@@ -96,23 +97,18 @@ int distance(NS* boxes[1000], edgeStruct* edges, int boxesSize)     // calculate
 	return edgesIndex;
 }
 
-void sortEdges(edgeStruct* edges, int noEdges)
+void sortEdgesNewIter(edgeStruct* edges, int noEdges)
 {
-	for (int i = 0; i < noEdges - 1; i++)
-		for (int j = i + 1; j < noEdges; j++)
-			if (edges[i].cost > edges[j].cost)
-			{
-				edgeStruct aux = edges[i];
-				edges[i] = edges[j];
-				edges[j] = aux;
-			}
+	sort(edges, edges + noEdges, [](const edgeStruct& a, const edgeStruct& b) {return a.cost < b.cost; }); 
 }
 
-long long int kruskal(edgeStruct edges[], NS* sets[1000], int noEdges, int noBoxes)
+void kruskal(edgeStruct edges[], NS* sets[1000], int noEdges, int noBoxes, int noConnections)
 {
 	int count = 1;
 
-	for (int i = 0; i < noEdges && count < 10; i++)
+	sortEdgesNewIter(edges, noEdges);
+
+	for (int i = 0; i < noConnections; i++)
 	{
 		int u = edges[i].firstNode;
 		int v = edges[i].secondNode;
@@ -126,6 +122,7 @@ long long int kruskal(edgeStruct edges[], NS* sets[1000], int noEdges, int noBox
 	}
 
 	for (int i = 0; i < noBoxes - 1; i++)
+	{
 		for (int j = i + 1; j < noBoxes; j++)
 			if (sets[i]->size < sets[j]->size)
 			{
@@ -133,14 +130,14 @@ long long int kruskal(edgeStruct edges[], NS* sets[1000], int noEdges, int noBox
 				sets[i] = sets[j];
 				sets[j] = aux;
 			}
+		if (sets[i]->size == 0)
+			break;
+	}
 
 	for (int i = 0; i < noBoxes; i++)
 		cout << sets[i]->size << " ";
 
-	long long int answer;
-	answer = sets[0]->size * sets[1]->size * sets[2]->size;
-
-	return answer;
+	//return answer;
 }
 
 void part1()
@@ -164,19 +161,19 @@ void part1()
 
 	cout << endl;
 
-	edgeStruct* edges = (edgeStruct*)malloc(1000000 * sizeof(edgeStruct));
+	edgeStruct* edges = (edgeStruct*)malloc(2000000 * sizeof(edgeStruct));
 	int noEdges = distance(boxesCoords, edges, indexBoxes);
 
-	sortEdges(edges, noEdges);
-
-	for (int i = 0; i < noEdges; i++)
+	/*for (int i = 0; i < noEdges; i++)
 	{
 		cout << edges[i].firstNode << "->" << edges[i].secondNode << " with cost: " << edges[i].cost << endl;
-	}
+	}*/
 
-	long long int answer = kruskal(edges, boxesCoords, noEdges, indexBoxes);
 
-	cout << endl << "answer: " << answer;
+	kruskal(edges, boxesCoords, noEdges, indexBoxes, 1000);
+	//long long int answer = kruskal(edges, boxesCoords, noEdges, indexBoxes, 10);
+
+	//cout << endl << "answer: " << answer;
 }
 
 int main()
