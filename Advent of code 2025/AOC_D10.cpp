@@ -2,15 +2,16 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
 typedef struct machine
 {
-	char diagram[9];   // from what I've seen the number of lights is capped at 9, diagram is what lights should look like
-	char lights[9];
-	int buttons[100][9];  // rows are the buttons, cols affect the lights
-	int joltage[1000];
+	vector<char> diagram[9];   // from what I've seen the number of lights is capped at 9, diagram is what lights should look like
+	vector<char> lights[9];
+	vector<vector<int>> buttons[100][9];  // rows are the buttons, cols affect the lights
+	vector<int> joltage[1000];
 	int noOfButtons, noOfLights, noOfJoltage;
 };
 
@@ -18,7 +19,7 @@ void initMachine(machine* m)
 {
 	for (int i = 0; i < 100; i++)
 		for (int j = 0; j < 9; j++)
-			m->buttons[i][j] = -1;
+			m->buttons[i]->push_back({-1});
 
 	for (int i = 0; i < 9; i++)
 		m->lights[i] = '.';           // in the beginning all lights are turned off
@@ -52,6 +53,17 @@ int main()
 		while (p != NULL)
 		{
 			p = strtok(NULL, " ");
+
+			int indexSize = 0;
+			
+			for (int i = 1; i < strlen(p)-1 && p[0] == '('; i++)
+				if (p[i] == ',')
+					continue;
+				else
+				{
+					index
+				}
+			
 		}
 	}
 }
