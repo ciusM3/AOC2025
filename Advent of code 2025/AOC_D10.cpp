@@ -3,67 +3,172 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <set>
+#include <queue>
+#include <string.h>
 
 using namespace std;
 
 typedef struct machine
 {
-	vector<char> diagram[9];   // from what I've seen the number of lights is capped at 9, diagram is what lights should look like
-	vector<char> lights[9];
-	vector<vector<int>> buttons[100][9];  // rows are the buttons, cols affect the lights
-	vector<int> joltage[1000];
-	int noOfButtons, noOfLights, noOfJoltage;
+	vector<int> diagram;
+	vector<int> lights;
+	vector< vector<int> > buttons;
+	vector<int> joltage;
 };
 
-void initMachine(machine* m)
+void buttonPress(vector<int> &lights, vector<int> button)
 {
-	for (int i = 0; i < 100; i++)
-		for (int j = 0; j < 9; j++)
-			m->buttons[i]->push_back({-1});
-
-	for (int i = 0; i < 9; i++)
-		m->lights[i] = '.';           // in the beginning all lights are turned off
+	for (int switchState : button)
+	{
+		lights[switchState] ^= 1;
+	}
 }
 
-void printDiagram(machine m)
+int bfs(vector<int> diagram, vector<int> lights, vector<vector<int>> buttons)
 {
-	for(int i=0; i<m.noOfLights;i++)
-		cout << m.diagram[i];
-	cout << endl;
+	queue<vector<int>> queue;
+	set<vector<int>> visited;
+
+	queue.push(lights);
+	visited.insert(lights);
+
+	int level = 0;
+
+	while (!queue.empty())
+	{
+		int noElementsInLevel = queue.size();
+
+		while (noElementsInLevel)
+		{
+			vector<int> current = queue.front();
+			queue.pop();
+
+			if (current == diagram)
+				return level;
+
+			for (vector<int> button : buttons)
+			{
+				vector<int> newLights = current;
+				buttonPress(newLights, button);
+
+				if (visited.find(newLights) == visited.end())
+				{
+					visited.insert(newLights);
+					queue.push(newLights);
+				}
+			}
+			noElementsInLevel--;
+		}
+		level++;
+	}
+
+	return -1; // not found
+}
+
+int bfsP2(vector<int> joltage, vector<vector<int>> buttons)
+{
+	queue<vector<int>> queue;
+	set<vector<int>> visited;
+
+	queue.push(lights);
+	visited.insert(lights);
+
+	int level = 0;
+
+	while (!queue.empty())
+	{
+		int noElementsInLevel = queue.size();
+
+		while (noElementsInLevel)
+		{
+			vector<int> current = queue.front();
+			queue.pop();
+
+			if (current == joltage)
+				return level;
+
+			for (vector<int> button : buttons)
+			{
+				vector<int> newLights = current;
+				buttonPress(newLights, button);
+
+				if (visited.find(newLights) == visited.end())
+				{
+					visited.insert(newLights);
+					queue.push(newLights);
+				}
+			}
+			noElementsInLevel--;
+		}
+		level++;
+	}
+
+	return -1; // not found
+}
+
+void part1()
+{
+	ifstream input("input.txt");
+
+	char line[1000];
+	int answer = 0;
+
+	while (input.getline(line, 1000))
+	{
+		machine currentMachine;
+
+		char* p = strtok(line, " ");
+
+		while (p)                               // nest god reading
+		{
+			if (p[0] == '[')
+			{
+				for (int i = 1; i < strlen(p) - 1; i++)
+				{
+					if (p[i] == '#')
+						currentMachine.diagram.push_back(1);
+					else
+						currentMachine.diagram.push_back(0);
+
+					currentMachine.lights.push_back(0);
+				}
+			}
+			else
+				if (p[0] == '(')
+				{
+					vector<int> button;
+					for (int i = 1; i < strlen(p) - 1; i++)
+					{
+						if (isdigit(p[i]))
+							button.push_back(p[i] - '0');
+					}
+					currentMachine.buttons.push_back(button);
+				}
+				else
+					if (p[0] == '{')
+					{
+						for (int i = 1; i < strlen(p) - 1; i++)
+						{
+							if (isdigit(p[i]))
+								currentMachine.joltage.push_back(p[i] - '0');
+						}
+					}
+
+			p = strtok(NULL, " ");
+		}
+
+		for (int i = 0; i < currentMachine.diagram.size(); i++)
+			cout << currentMachine.diagram[i];
+		cout << endl;
+
+		answer += bfs(currentMachine.diagram, currentMachine.lights, currentMachine.buttons);
+
+	}
+	cout <<endl<< "answer: " << answer;
 }
 
 int main()
 {
-	ifstream input("input.txt");
-
-	char line[200];
-	while (input.getline(line, 200))
-	{
-		machine m;
-		initMachine(&m);
-
-		cout << line << endl;
-		char* p = strtok(line, " ");
-
-		memcpy(m.diagram, line + 1, strlen(line) - 2);   // the first will always be the diagram
-		m.noOfLights = strlen(line) - 2;
-
-		printDiagram(m);
-		
-		while (p != NULL)
-		{
-			p = strtok(NULL, " ");
-
-			int indexSize = 0;
-			
-			for (int i = 1; i < strlen(p)-1 && p[0] == '('; i++)
-				if (p[i] == ',')
-					continue;
-				else
-				{
-					index
-				}
-			
-		}
-	}
+	part1();
 }
