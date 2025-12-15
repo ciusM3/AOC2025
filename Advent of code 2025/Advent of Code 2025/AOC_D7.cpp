@@ -1,0 +1,177 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <iomanip>
+#include <iostream>
+#include <fstream>
+#include <string.h>
+
+using namespace std;
+
+char** createMap(int& noRows, int& noCols)
+{
+	ifstream input("input.txt");
+	char line[1000];
+
+	input.getline(line, 1000);
+
+	// finding the size of map
+	noCols = strlen(line) + 1;
+
+	// allocating map on heap
+	char** map = (char**)malloc(noCols * sizeof(char*));
+	for (int i = 0; i < noCols; i++)
+		map[i] = (char*)malloc(noCols * sizeof(char));
+
+	// for the first line of the map cause I read it for the size
+	for (int j = 0; j < strlen(line); j++)
+		map[0][j] = line[j];
+
+
+	//  finishing copying elements to map
+	noRows = 1;
+
+	while (input.getline(line, 1000))
+	{
+		for (int j = 0; j < strlen(line); j++)
+			map[noRows][j] = line[j];
+		noRows++;
+	}
+
+	noCols -= 1; // because its almost a perfect square multidimensional array but noCols are -1
+
+	return map;
+}
+
+void printMap(char** map, int noRows, int noCols)
+{
+	for (int i = 0; i < noRows; i++)
+	{
+		for (int j = 0; j < noCols; j++)
+			cout << map[i][j];
+		cout << endl;
+	}
+}
+
+int getStart(char** map, int noCols)
+{
+	for (int j = 0; j < noCols; j++)
+		if (map[0][j] == 'S')
+			return j;
+	return -1; // not found
+}
+
+void tachyonSplit(char** map, int currentCol, int currentRow, int noRows, int noCols)
+{
+	if (currentRow == noRows - 1)
+		return;
+
+	if (map[currentRow + 1][currentCol] == '|') // if the next element is a beam, stop this branch and go next
+		return;
+
+	//printMap(map, noRows, noCols);   // only for the example, the puzzle input takes too much
+	//cout << endl;
+
+	if (map[currentRow + 1][currentCol] == '.')  // if the beam can pass straight down I put | and continue to the next row
+	{
+		if (map[currentRow + 1][currentCol] == '.')
+			map[currentRow + 1][currentCol] = '|';
+		tachyonSplit(map, currentCol, currentRow + 1, noRows, noCols);
+	}
+	else
+		if (map[currentRow + 1][currentCol - 1] != '|' && map[currentRow + 1][currentCol + 1] != '|')  // there is a splitter, if there aren't beams that means it can be split in 2
+		{
+			map[currentRow + 1][currentCol - 1] = '|';
+			map[currentRow + 1][currentCol + 1] = '|';
+			tachyonSplit(map, currentCol - 1, currentRow + 1, noRows, noCols);
+			tachyonSplit(map, currentCol + 1, currentRow + 1, noRows, noCols);
+		}
+		else
+			if (map[currentRow + 1][currentCol - 1] == '|' && map[currentRow + 1][currentCol + 1] != '|')  // there is a splitter, but a beam already passed the left column. 
+			{																							  // The algorithm always makes the left branch of beams first, so no need to check the right branch.
+				map[currentRow + 1][currentCol + 1] = '|';
+				tachyonSplit(map, currentCol + 1, currentRow + 1, noRows, noCols);
+			}
+}
+
+long long int tachyonSplitP2(char** map, int noRows, int noCols)
+{
+	int start = getStart(map, noCols);
+
+	long long int** lldMap = (long long int**)calloc(noRows, sizeof(long long int*));  
+	for (int i = 0; i < noRows; i++) 
+		lldMap[i] = (long long int*)calloc(noCols, sizeof(long long int));  
+
+	lldMap[0][start] = 1;
+
+	for (int i = 1; i < noRows; i++)
+	{
+		for (int j = 0; j < noCols; j++)
+		{
+			if (map[i][j] == '^')
+			{
+				if (j + 1 < noCols)
+					lldMap[i][j + 1] += lldMap[i - 1][j];
+
+				if (j - 1 >= 0)
+					lldMap[i][j - 1] += lldMap[i - 1][j];
+			}
+			else
+			{
+				lldMap[i][j] += lldMap[i - 1][j];
+			}
+		}
+	}
+
+	for (int i = 0; i < noRows; i++)
+	{
+		for (int j = 0; j < noCols; j++)
+			cout << lldMap[i][j] << " ";
+		cout << endl;
+	}
+
+	long long int answer = 0;
+	for (int i = 0; i < noCols; i++)
+		answer += lldMap[noRows - 1][i];
+
+	return answer;
+}
+
+int noOfSplitersHit(char** map, int noRows, int noCols)  // used for part 1, the answer is the number of spliters the beams hit
+{
+	int count = 0;
+	for (int i = 1; i < noRows; i++)
+	{
+		for (int j = 0; j < noCols; j++)
+			if (map[i][j] == '^' && map[i - 1][j] == '|')
+				count++;
+	}
+	return count;
+}
+
+void part1()
+{
+	int noRows, noCols;
+	char** map = createMap(noRows, noCols);
+
+	int start = getStart(map, noCols);
+
+	tachyonSplit(map, start, 0, noRows, noCols);
+	int answer = noOfSplitersHit(map, noRows, noCols);
+	printMap(map, noRows, noCols);
+
+	cout << "answer: " << answer << endl;
+}
+
+void part2()
+{
+	int noRows, noCols;
+	char** map = createMap(noRows, noCols);
+
+	long long int answer = tachyonSplitP2(map, noRows, noCols);;
+
+	cout << "answer: " << answer << endl;
+}
+
+int main()
+{
+	part2();
+}
