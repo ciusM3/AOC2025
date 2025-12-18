@@ -8,45 +8,35 @@
 
 using namespace std;
 
+typedef struct rangeIds
+{
+	long long int firstId, secondId;
+};
+
 void part1()
 {
 	ifstream input("input.txt");
-	long long int firstId, secondId, ingredient;
-	char dash;
+	vector<rangeIds> ranges;
+	long long int ingredient;
 	char line[1000];
-	char ranges[1000][1000];
+	int answer = 0;
 
-	int index = 0;
 	while (input >> line)
 	{
-		if (strchr(line, '-'))
+		while (strchr(line, '-'))
 		{
-			strcpy(ranges[index], line);
-			index++;
+			rangeIds range;
+			sscanf(line, "%lld-%lld", &range.firstId, &range.secondId);
+			ranges.push_back(range);
+			input >> line;
 		}
-		else
-			break;
-	}
+		
+		ingredient = atoll(line);
 
-	int answer = 0;
-	sscanf(line, "%lld", &ingredient);
-
-	for (int i = 0; i < index; i++)
-	{
-		sscanf(ranges[i], "%lld%c%lld", &firstId, &dash, &secondId);
-		if (ingredient >= firstId && ingredient <= secondId)
+		cout << line<<endl;
+		for (rangeIds range : ranges)
 		{
-			answer++;
-			break;
-		}
-	}
-
-	while (input >> ingredient)
-	{
-		for (int i = 0; i < index; i++)
-		{
-			sscanf(ranges[i], "%lld%c%lld", &firstId, &dash, &secondId);
-			if (ingredient >= firstId && ingredient <= secondId)
+			if (range.firstId <= ingredient && ingredient <= range.secondId)
 			{
 				answer++;
 				break;
@@ -55,27 +45,20 @@ void part1()
 	}
 
 	cout << "answer: " << answer;
-
 }
 
 // part 2 
-
-typedef struct rangeIds
-{
-	long long int firstId, secondId;
-};
-
 void mergeOverlaps(vector<rangeIds>& ranges)
 {
-	for (int i = 1; i < ranges.size(); i++) // the element that needs to be inserted in a range if overlapping(extends the range)
+	for (int i = 1; i < ranges.size(); i++) // the element that needs to be inserted in a range if overlapping
 	{
-		if (ranges[i].firstId >= ranges[i - 1].firstId && ranges[i].secondId <= ranges[i - 1].secondId)
+		if (ranges[i].firstId >= ranges[i - 1].firstId && ranges[i].secondId <= ranges[i - 1].secondId)  // is within previous range
 		{
 			ranges.erase(ranges.begin() + i);
 			i--;
 		}
 		else
-			if (ranges[i].firstId >= ranges[i - 1].firstId && ranges[i].firstId <= ranges[i - 1].secondId)
+			if (ranges[i].firstId >= ranges[i - 1].firstId && ranges[i].firstId <= ranges[i - 1].secondId) // extends range
 			{
 				ranges[i - 1].secondId = ranges[i].secondId;
 				ranges.erase(ranges.begin() + i);
@@ -110,7 +93,6 @@ void part2()
 {
 	ifstream input("input.txt");
 	vector<rangeIds> ranges;
-	char dash;
 	char line[1000];
 
 	while (input >> line)
@@ -119,7 +101,7 @@ void part2()
 		{
 			rangeIds range;
 
-			sscanf(line, "%lld%c%lld", &range.firstId, &dash, &range.secondId);
+			sscanf(line, "%lld-%lld", &range.firstId, &range.secondId);
 
 			ranges.push_back(range);
 		}
@@ -145,5 +127,20 @@ void part2()
 
 int main()
 {
-	part2();
+	part1();
 }
+/* Write up
+* Part 1
+* The problem asks to check if ingredients are in a range of non-spoiled ingredients.
+* To solve, store the id ranges in an array/vector. When getting to reading ingredient ids, go through the ranges and check if it is found in a range.
+* If yes, then count.
+*
+* Part 2
+* During this part, we must get how many ids are considered fresh, but we face an overlapping ranges problem. 
+* 
+* To solve this issue, we order the ranges in order of the first id.
+* In func mergeOverlaps we check if current range is within the previous one, if it is, then erase it,
+* else if the current first id is within the previous range, merge the two ranges into a bigger one.
+* 
+* After all merges are done, calculate the sizes of the ranges to get answers.
+*/

@@ -3,7 +3,7 @@
 #include <string.h>
 using namespace std;
 
-int getBiggestFromRange(int* arr, int l, int r)
+int getBiggestFromRange(int* arr, int l, int r)  // gets the biggest number within the given range of an array
 {
 	int index, max = -1;
 	for (int i = l; i <= r; i++)
@@ -36,7 +36,7 @@ void part1()
 		for (int i = 0; i < sizeOfBank; i++)
 			arr[i] = bank[i] - '0';
 
-		indexFirst = getBiggestFromRange(arr, 0, sizeOfBank - 2);  // indexFirst = getBiggestFromRange(arr, 0, sizeOfBank - 1 - k);  recurrence formula (k is bigger the smalled the index is);
+		indexFirst = getBiggestFromRange(arr, 0, sizeOfBank - 2);
 		indexSecond = getBiggestFromRange(arr, indexFirst + 1, sizeOfBank - 1);
 
 		firstBiggest = arr[indexFirst];
@@ -85,3 +85,20 @@ int main()
 {
 	part1();
 }
+/* Write up
+* Part 1
+* This part of the problem asks us to make a combination of the two biggest numbers in order of appearance.
+* Example: from the number 1215 the combination of the two biggest numbers will be 25. We can't swap them around.
+* 
+* To solve this, create func getBiggestFromRange that gets the biggest number in an array within the given range.
+* Break the input into an array and create two variables that store the index of the two highest numbers within the array using previous func.
+* Construct the joltage using the values in the array at the given indexes and then count it.
+* 
+* Part 2
+* For this part, the previous idea used on part 1 must be extended to make the combination consisting of the twelve biggest numbers in order of appearance.
+* The following recurrence formula can be used to solve this part.
+* 
+* batteryIndex = getBiggestFromRange(arr,  batteryIndex + 1, sizeOfBank - 1 - k);  
+* k is bigger the smaller the index is, it must be done like this so the k-th largest number leaves space for the remaining numbers to come.
+* Like in part 1, construct the joltage with the largest numbers and count.
+*/

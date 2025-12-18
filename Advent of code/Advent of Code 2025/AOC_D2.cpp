@@ -8,7 +8,7 @@
 
 using namespace std;
 
-int getSize(long long int id)
+int getSize(long long int id)  // gets the number length
 {
 	int size = 0;
 
@@ -23,7 +23,7 @@ int getSize(long long int id)
 	return size;
 }
 
-int allEqual(vector<long long int> pairs)
+int allEqual(vector<long long int> pairs)  // checks if all the pairs created from an id are equal
 {
 	if (pairs.size() < 2)
 		return 0;
@@ -79,13 +79,13 @@ void part2()
 
 				long long int iCopy = i;
 
-				while (iCopy > 0)
+				while (iCopy > 0)  // break the copy of id into pairs
 				{
 					pairs.push_back(iCopy % pairGet);
 					iCopy /= pairGet;
 				}
 
-				if (allEqual(pairs))
+				if (allEqual(pairs))  // check if those pairs are all equal
 				{
 					answer += i;
 					break;
@@ -101,3 +101,18 @@ int main()
 {
 	part2();
 }
+/* Write up
+* Part 1
+* The problem asks to check if a number is composed from the same sequence twice.
+* For this part, the solution is simple, get the length of the id and make 2 pairs of length/2.
+* If those two halves are equal, count the id.
+* 
+* Part 2
+* Now we have to check if a sequence is repeated at least twice.
+* 
+* To solve this, make an array/vector of the pairs starting from pairSize = 1 up to id length/2.
+* There must be a check to see if we can make pairs with the current pair size, 
+* example: you can't make pairs with pair size = 3 from an id with the length of 8.
+* After that make a copy of the id and break it into pairs stored in the pairs array/vector.
+* If all the pairs are equal, count the id.
+*/

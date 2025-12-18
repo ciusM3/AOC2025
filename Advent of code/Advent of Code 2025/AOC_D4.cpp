@@ -135,3 +135,19 @@ int main()
 {
 	part1();
 }
+/* Write up
+* Part 1
+* The problems asks us to remove the paper rolls that have fewer than four adjacent paper rolls in the 8 positions surrounding the current one.
+* To solve this, create a map containing the information from input.
+* Create func eliminateRoll that can count the number of rolls that can be accessed and change the map according to the following rules:
+* - if on the current position we have a roll, as a placeholder put '.';
+* - check the 3x3 space and see how many adjacent rolls there are, 'x' is taken in consideration as well;
+* - if there are fewer than 3 then replace current position with 'x' meaning there was a roll there and count the roll using answer,
+*   else put '@' back on current position, this means it cannot be removed;
+* - after checking all the map, be sure to replace 'x' in map with '.'.
+* Finally, return answer, the number of rolls removed;
+*
+* Part 2
+* For this part we have to continuously remove rolls until no more eliminations can be made.
+* Just loop the function until it returns 0.
+*/
